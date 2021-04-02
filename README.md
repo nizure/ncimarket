@@ -1,6 +1,2 @@
 # ncimarket
-<<<<<<< HEAD
-! [AKS Baseline architecture]
-=======
-
->>>>>>> c5c909caf2eb02471621c5938a5dd61352efd3b5
+! [AKS Baseline architecture](https://raw.githubusercontent.com/nizure/ncimarket/8e2217eb155a52cbd5593e232b4332b9a238748e/design/terraks.svg?token=ALCCCV72R2JU6AAEX5LQF33AM3YKS)
