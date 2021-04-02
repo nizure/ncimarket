@@ -1,20 +1,23 @@
 terraform {
-    reauired_version = ">= 0.14.8"
-    backend "azurerm" {}
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=2.46.0"
+    }
+  }
 }
-
+# Configure the Microsoft Azure Provider
 provider "azurerm" {
-    version = "~> 2.51.0"
-    features {}
+  features {}
 }
 
-data "azurerm_subscription" "current" {}
+# data "azurerm_subscription" "current" {}
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.env}-aks-rg"
   location = var.location
   tags = {
-    environment = "${var.env}"
+    environment = "$${var.env}"
   }
 }
 
