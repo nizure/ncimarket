@@ -16,7 +16,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # sku_tier                        = var.sku_tier
 
   default_node_pool {
-    name                = "${var.env}pool" //substr(var.system_node_pool.name, 0, 12)
+    name                = "agentpool" //substr(var.system_node_pool.name, 0, 12)
     vm_size             = var.vm_size
     availability_zones  = [1, 2, 3]
     enable_auto_scaling = true
@@ -70,7 +70,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
 resource "kubernetes_cluster_role_binding" "aad_integration" {
   metadata {
-    name = "${var.env}admins"
+    # name = "${var.env}admins"
+    name = "${azurerm_kubernetes_cluster.aks_cluster.name}admins" 
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -87,7 +88,7 @@ resource "kubernetes_cluster_role_binding" "aad_integration" {
 
 # Allows all get list of namespaces, otherwise tools like 'kubens' won't work
 resource "kubernetes_cluster_role" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.k8s]
+  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
   for_each   = true ? toset(["ad_rbac"]) : []
   metadata {
     name = "list-namespaces"
@@ -107,7 +108,7 @@ resource "kubernetes_cluster_role" "all_can_list_namespaces" {
 
 
 resource "kubernetes_cluster_role_binding" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.k8s]
+  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
   for_each   = true ? toset(["ad_rbac"]) : []
   metadata {
     name = "authenticated-can-list-namespaces"
