@@ -5,7 +5,7 @@ terraform {
       version = "=2.46.0"
     }
     azuread = {
-      source = "hashicorp/azuread"
+      source  = "hashicorp/azuread"
       version = "1.4.0"
     }
   }
@@ -18,13 +18,14 @@ provider "azurerm" {
 provider "azuread" {
   features {}
 }
+
 # data "azurerm_subscription" "current" {}
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.env}-aks-rg"
   location = var.location
   tags = {
-    environment = "$${var.env}"
+    environment = var.env
   }
 }
 
