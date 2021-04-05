@@ -14,14 +14,6 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 
   resource_group_name = azurerm_resource_group.rg.name
 
-  linux_profile {
-    admin_username = var.vm_user_name
-
-    ssh_key {
-      key_data = var.public_ssh_key_path
-    }
-  }
-
   addon_profile {
     http_application_routing {
       enabled = true
@@ -51,15 +43,12 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   }
 
   network_profile {
-    network_plugin     = "azure"
-    dns_service_ip     = var.aks_dns_service_ip
-    docker_bridge_cidr = var.aks_docker_bridge_cidr
-    service_cidr       = var.aks_service_cidr
+    network_plugin    = "azure"
+    network_policy    = "azure"
+    load_balancer_sku = "Standard"
   }
 
-  depends_on = [
-    azurerm_virtual_network.demo
-  ]
+  depends_on = [azurerm_virtual_network.demo]
   tags = var.tags
 }
 

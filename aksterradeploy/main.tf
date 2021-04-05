@@ -7,7 +7,12 @@ provider "azurerm" {
 terraform {
   required_version = ">= 0.14.8"
   # Backend variables are initialized by Azure DevOps
-  backend "azurerm" {}
+  backend "azurerm" {
+    resource_group_name  = "backend_rg"
+    storage_account_name = "backendriz"
+    container_name       = "workspace"
+    key                  = "dev.terraform.tfstate"
+  }
 }
 
 data "azurerm_subscription" "current" {}

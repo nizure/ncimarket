@@ -14,18 +14,18 @@ variable "aks-aad-client-id" {
 
 variable "aks-aad-clusteradmins" {
   description = " Name of the Existing admin group."
-  default     = "demo-clusteradmin"
+  default     = "zir-clusteradmin"
 }
 
 
 variable "resource_group_name" {
   description = "Name of the resource group."
-  default     = "aks-identity-demo"
+  default     = "aks-identity-zir"
 }
 
 variable "location" {
   description = "Location of the cluster."
-  default     = "eastus2"
+  default     = "eastus"
 }
 
 variable "virtual_network_name" {
@@ -35,7 +35,7 @@ variable "virtual_network_name" {
 
 variable "virtual_network_address_prefix" {
   description = "VNET address prefix"
-  default     = "15.0.0.0/8"
+  default     = "10.0.0.0/16"
 }
 
 variable "aks_subnet_name" {
@@ -45,31 +45,31 @@ variable "aks_subnet_name" {
 
 variable "aks_subnet_address_prefix" {
   description = "Subnet address prefix."
-  default     = "15.0.0.0/16"
+  default     = "10.0.0.0/18"
 }
 
 
 variable "container_registry_name" {
 
   description = "Container Registry name"
-  default     = "ENTER NAME HERE"
+  default     = "rizdemacr"
 }
 
 variable "key_vault_name" {
   description = "Existing key vault name"
-  default     = "ENTER NAME HERE"
+  default     = "zir-vault"
 }
 
 
 variable "key_vault_rg" {
   description = "Existing key vault rg"
-  default     = "demo-apps" # ENTER NAME HERE
+  default     = "zir-apps" # ENTER NAME HERE
 }
 
 
 variable "aks_name" {
   description = "AKS cluster name"
-  default     = "demo-cluster" # ENTER NAME HERE
+  default     = "zir-cluster" # ENTER NAME HERE
 }
 variable "aks_dns_prefix" {
   description = "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
@@ -94,7 +94,7 @@ variable "aks_agent_os_disk_size" {
 
 variable "kubernetes_version" {
   description = "Kubernetes version"
-  default     = "1.11.5"
+  default     = "1.18.14"
 }
 
 variable "aks_service_cidr" {
@@ -122,10 +122,6 @@ variable "vm_user_name" {
   default     = "vmuser1"
 }
 
-variable "public_ssh_key_path" {
-  description = "Public key path for SSH."
-  default     = "Enter PK HERE"
-}
 
 variable "tags" {
   type = map(string)
@@ -144,10 +140,10 @@ variable "azure_ad_admin_groups" {
 
 variable "podIdentity" {
   description = "AKS pod identity"
-  default     = "demoIdentity"
+  default     = "zirIdentity"
 }
 
 variable "kubernetes_namespace" {
   description = "AKS namespace"
-  default     = "demo"
+  default     = "zir"
 }
