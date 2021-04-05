@@ -1,13 +1,20 @@
-module "vnet" {
-  source              = "Azure/vnet/azurerm"
-  vnet_name           = "${var.env}-vnet"
+resource "azurerm_virtual_network" "demo" {
+  name                = var.virtual_network_name
+  location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  address_space       = [var.vnet_address_prefix]
-  subnet_prefixes     = [var.aks_subnet_address_prefix, var.gateway_subnet_address_prefix, var.admin_subnet_address_prefix]
-  subnet_names        = ["aks-subnet", "gateway-subnet", "admin-subnet"]
+  address_space       = [var.virtual_network_address_prefix]
 
-  tags = {
-    environment = var.env
+  subnet {
+    name           = var.aks_subnet_name
+    address_prefix = var.aks_subnet_address_prefix
   }
-  depends_on = [azurerm_resource_group.rg]
+
+  tags = var.tags
+}
+
+data "azurerm_subnet" "kubesubnet" {
+  name                 = var.aks_subnet_name
+  virtual_network_name = azurerm_virtual_network.demo.name
+  resource_group_name  = var.resource_group_name
+  depends_on           = [azurerm_virtual_network.demo]
 }

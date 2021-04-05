@@ -1,5 +1,5 @@
 resource "azurerm_container_registry" "acr" {
-  name                = "${var.env}acreg"
+  name                = var.container_registry_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Standard"
@@ -7,71 +7,67 @@ resource "azurerm_container_registry" "acr" {
 }
 
 
-resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  name                = "${var.env}-aks"
-  location            = azurerm_resource_group.rg.location
+resource "azurerm_kubernetes_cluster" "k8s" {
+  name       = var.aks_name
+  location   = azurerm_resource_group.rg.location
+  dns_prefix = var.aks_dns_prefix
+
   resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = "${var.env}-aks"
-  # private_cluster_enabled         = false
-  # sku_tier                        = var.sku_tier
+
+  linux_profile {
+    admin_username = var.vm_user_name
+
+    ssh_key {
+      key_data = var.public_ssh_key_path
+    }
+  }
+
+  addon_profile {
+    http_application_routing {
+      enabled = true
+    }
+
+  }
 
   default_node_pool {
-    name                = "agentpool" //substr(var.system_node_pool.name, 0, 12)
-    vm_size             = var.vm_size
-    availability_zones  = [1, 2, 3]
-    enable_auto_scaling = true
-    max_count           = var.max_node
-    min_count           = var.min_node
-    os_disk_size_gb     = var.os_size
-    type                = "VirtualMachineScaleSets"
-    vnet_subnet_id      = module.vnet.vnet_subnets[0]
-
-
-    tags = {
-      "environment" = var.env
-      "nodepoolos"  = "linux"
-      "app"         = "system-apps"
-    }
-  }
-  addon_profile {
-    azure_policy { enabled = true }
-
-    http_application_routing { enabled = true }
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = var.logspaceid
-    }
+    name            = "agentpool"
+    node_count      = var.aks_agent_count
+    vm_size         = var.aks_agent_vm_size
+    os_disk_size_gb = var.aks_agent_os_disk_size
+    vnet_subnet_id  = data.azurerm_subnet.kubesubnet.id
   }
 
-  # Identity (System Assigned or Service Principal)
+  # block will be applied only if `enable` is true in var.azure_ad object
+  role_based_access_control {
+    azure_active_directory {
+      managed = true
+      admin_group_object_ids = var.azure_ad_admin_groups
+    }
+    enabled = true
+  }
+
   identity {
     type = "SystemAssigned"
   }
 
-  # RBAC and Azure AD Integration Block
-  role_based_access_control {
-    enabled = true
-    azure_active_directory {
-      managed                = true
-      admin_group_object_ids = var.azure_ad_admin_groups
-    }
-  }
-  # Network Profile
   network_profile {
-    network_plugin    = "azure"
-    network_policy    = "azure"
-    load_balancer_sku = "Standard"
+    network_plugin     = "azure"
+    dns_service_ip     = var.aks_dns_service_ip
+    docker_bridge_cidr = var.aks_docker_bridge_cidr
+    service_cidr       = var.aks_service_cidr
   }
 
-  tags = {
-    Environment = "dev"
-  }
+  depends_on = [
+    azurerm_virtual_network.demo
+  ]
+  tags = var.tags
 }
+
+
 
 resource "kubernetes_cluster_role_binding" "aad_integration" {
   metadata {
-    # name = "${var.env}admins"
-    name = "${azurerm_kubernetes_cluster.aks_cluster.name}admins" 
+    name = "${var.aks_name}admins"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -83,12 +79,16 @@ resource "kubernetes_cluster_role_binding" "aad_integration" {
     name      = var.aks-aad-clusteradmins
     api_group = "rbac.authorization.k8s.io"
   }
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
+  depends_on = [
+    azurerm_kubernetes_cluster.k8s
+  ]
 }
+
+
 
 # Allows all get list of namespaces, otherwise tools like 'kubens' won't work
 resource "kubernetes_cluster_role" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
+  depends_on = [azurerm_kubernetes_cluster.k8s]
   for_each   = true ? toset(["ad_rbac"]) : []
   metadata {
     name = "list-namespaces"
@@ -108,7 +108,7 @@ resource "kubernetes_cluster_role" "all_can_list_namespaces" {
 
 
 resource "kubernetes_cluster_role_binding" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
+  depends_on = [azurerm_kubernetes_cluster.k8s]
   for_each   = true ? toset(["ad_rbac"]) : []
   metadata {
     name = "authenticated-can-list-namespaces"
