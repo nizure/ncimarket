@@ -49,6 +49,10 @@ variable "min_node" {
   default     = 2
 }
 
+variable "aks-aad-clusteradmins" {
+  description = " Name of the Existing admin group."
+  default     = "aks"
+}
 variable "azure_ad_admin_groups" {
   description = "This list of groups Priniciple Ids who will be bounded to cluster-Admin role to get full Admin rights for this cluster. This used only if `azure_ad` is enabled"
   type        = list(string)

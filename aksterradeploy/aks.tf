@@ -33,18 +33,19 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
       "app"         = "system-apps"
     }
   }
-
-  # Identity (System Assigned or Service Principal)
-  identity {
-    type = "SystemAssigned"
-  }
-
   addon_profile {
     azure_policy { enabled = true }
+
+    http_application_routing { enabled = true }
     oms_agent {
       enabled                    = true
       log_analytics_workspace_id = var.logspaceid
     }
+  }
+
+  # Identity (System Assigned or Service Principal)
+  identity {
+    type = "SystemAssigned"
   }
 
   # RBAC and Azure AD Integration Block
@@ -55,7 +56,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
       admin_group_object_ids = var.azure_ad_admin_groups
     }
   }
-
   # Network Profile
   network_profile {
     network_plugin    = "azure"
@@ -66,5 +66,61 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   tags = {
     Environment = "dev"
   }
+}
 
+resource "kubernetes_cluster_role_binding" "aad_integration" {
+  metadata {
+    name = "${var.env}admins"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+  subject {
+    kind      = "Group"
+    name      = var.aks-aad-clusteradmins
+    api_group = "rbac.authorization.k8s.io"
+  }
+  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
+}
+
+# Allows all get list of namespaces, otherwise tools like 'kubens' won't work
+resource "kubernetes_cluster_role" "all_can_list_namespaces" {
+  depends_on = [azurerm_kubernetes_cluster.k8s]
+  for_each   = true ? toset(["ad_rbac"]) : []
+  metadata {
+    name = "list-namespaces"
+  }
+
+  rule {
+    api_groups = ["*"]
+    resources = [
+      "namespaces"
+    ]
+    verbs = [
+      "list",
+    ]
+  }
+}
+
+
+
+resource "kubernetes_cluster_role_binding" "all_can_list_namespaces" {
+  depends_on = [azurerm_kubernetes_cluster.k8s]
+  for_each   = true ? toset(["ad_rbac"]) : []
+  metadata {
+    name = "authenticated-can-list-namespaces"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.all_can_list_namespaces[each.key].metadata.0.name
+  }
+
+  subject {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Group"
+    name      = "system:authenticated"
+  }
 }
