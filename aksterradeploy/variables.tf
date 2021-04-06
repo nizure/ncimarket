@@ -4,6 +4,26 @@ variable "env" {
   default     = "dev01"
   #   default     = "prod"
 }
+
+variable "tags" {
+  type = map(string)
+  description = "Tag Name"
+  default = {
+    source = "dev"
+  }
+}
+
+variable "apgw_name" {
+  type        = string
+  description = "Application Gateway Name"
+  default     = "niapgw"
+  #   default     = "prod"
+}
+
+variable "app_gateway_sku" {
+  description = "Name of the Application Gateway SKU"
+  default     = "Standard_v2"
+}
 variable "location" {
   type    = string
   default = "eastus"
@@ -30,6 +50,10 @@ variable "admin_subnet_address_prefix" {
   default     = "10.100.17.0/24"
 }
 
+variable "kubversion" {
+  description = "kubernetes version"
+  default     = "1.19.7"
+}
 variable "vm_size" {
   description = "AKS Node Poll VM Size"
   default     = "Standard_DS2_v2"

@@ -6,121 +6,42 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled       = false
 }
 
-
-resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  name                = "${var.env}-aks"
-  location            = azurerm_resource_group.rg.location
+module "aks" {
+  source              = "Azure/aks/azurerm"
   resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = "${var.env}-aks"
-  # private_cluster_enabled         = false
-  # sku_tier                        = var.sku_tier
+  # client_id                        = "your-service-principal-client-appid"
+  # client_secret                    = "your-service-principal-client-password"
+  kubernetes_version               = var.kubversion
+  orchestrator_version             = var.kubversion
+  prefix                           = var.env
+  network_plugin                   = "azure"
+  network_policy                   = "azure"
+  vnet_subnet_id                   = module.vnet.vnet_subnets[0]
+  os_disk_size_gb                  = var.os_size
+  sku_tier                         = "Paid" # defaults to Free
+  enable_role_based_access_control = true
+  rbac_aad_admin_group_object_ids  = var.azure_ad_admin_groups //[data.azuread_group.aks_cluster_admins.id]  #Object ID of groups with admin access.
+  rbac_aad_managed                 = true
+  private_cluster_enabled          = false
+  enable_log_analytics_workspace   = true
+  enable_http_application_routing  = true
+  enable_azure_policy              = true
+  enable_auto_scaling              = true
+  agents_min_count                 = var.min_node
+  agents_max_count                 = var.max_node
+  agents_count                     = null # Please set `agents_count` `null` while `enable_auto_scaling` is `true` to avoid possible `agents_count` changes.
+  agents_max_pods                  = 100
+  agents_pool_name                 = "exnodepool"
+  agents_availability_zones        = ["1", "2", "3"]
+  agents_type                      = "VirtualMachineScaleSets"
 
-  default_node_pool {
-    name                = "agentpool" //substr(var.system_node_pool.name, 0, 12)
-    vm_size             = var.vm_size
-    availability_zones  = [1, 2, 3]
-    enable_auto_scaling = true
-    max_count           = var.max_node
-    min_count           = var.min_node
-    os_disk_size_gb     = var.os_size
-    type                = "VirtualMachineScaleSets"
-    vnet_subnet_id      = module.vnet.vnet_subnets[0]
-
-
-    tags = {
-      "environment" = var.env
-      "nodepoolos"  = "linux"
-      "app"         = "system-apps"
-    }
-  }
-  addon_profile {
-    azure_policy { enabled = true }
-
-    http_application_routing { enabled = true }
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = var.logspaceid
-    }
+  agents_labels = {
+    "nodepool" : "defaultnodepool"
   }
 
-  # Identity (System Assigned or Service Principal)
-  identity {
-    type = "SystemAssigned"
+  agents_tags = {
+    "Agent" : "defaultnodepoolagent"
   }
 
-  # RBAC and Azure AD Integration Block
-  role_based_access_control {
-    enabled = true
-    azure_active_directory {
-      managed                = true
-      admin_group_object_ids = var.azure_ad_admin_groups
-    }
-  }
-  # Network Profile
-  network_profile {
-    network_plugin    = "azure"
-    network_policy    = "azure"
-    load_balancer_sku = "Standard"
-  }
-
-  tags = {
-    Environment = "dev"
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "aad_integration" {
-  metadata {
-    name = "${var.env}admins"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-  subject {
-    kind      = "Group"
-    name      = var.aks-aad-clusteradmins
-    api_group = "rbac.authorization.k8s.io"
-  }
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
-}
-
-# Allows all get list of namespaces, otherwise tools like 'kubens' won't work
-resource "kubernetes_cluster_role" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
-  for_each   = true ? toset(["ad_rbac"]) : []
-  metadata {
-    name = "list-namespaces"
-  }
-
-  rule {
-    api_groups = ["*"]
-    resources = [
-      "namespaces"
-    ]
-    verbs = [
-      "list",
-    ]
-  }
-}
-
-
-
-resource "kubernetes_cluster_role_binding" "all_can_list_namespaces" {
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
-  for_each   = true ? toset(["ad_rbac"]) : []
-  metadata {
-    name = "authenticated-can-list-namespaces"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.all_can_list_namespaces[each.key].metadata.0.name
-  }
-
-  subject {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Group"
-    name      = "system:authenticated"
-  }
+  depends_on = [module.vnet]
 }
