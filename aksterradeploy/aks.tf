@@ -45,3 +45,15 @@ module "aks" {
 
   depends_on = [module.vnet]
 }
+
+resource "azurerm_role_assignment" "aks_mi_role_assignment" {
+  scope                = module.vnet.vnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = module.aks.system_assigned_identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "aks_mi_container_registry" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = module.aks.kubelet_identity.0.object_id
+}

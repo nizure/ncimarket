@@ -4,7 +4,7 @@ resource "azurerm_public_ip" "pip" {
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
-  tags = var.tags
+  tags                = var.tags
 }
 
 resource "azurerm_application_gateway" "network" {
