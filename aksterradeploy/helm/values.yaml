@@ -1,0 +1,12 @@
+fullname: ""
+nameOverride: ""
+key_vault_id : ""
+tenant_id : ""
+environment : ""
+secret1: ""
+secret2: ""
+
+managedIdentity:
+  selectorName: azure-key-vault
+  resourceId:  /subscriptions/74677981-7139-4510-80ad-237e199e4b4a/resourcegroups/MC_dev01-aks-rg_dev01-aks_eastus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/dev01podIdentity
+  clientId: 5d23be49-37f2-40d1-9885-e93ecac3632d

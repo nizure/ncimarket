@@ -46,14 +46,58 @@ module "aks" {
   depends_on = [module.vnet]
 }
 
-resource "azurerm_role_assignment" "aks_mi_role_assignment" {
-  scope                = module.vnet.vnet_id
-  role_definition_name = "Network Contributor"
-  principal_id         = module.aks.system_assigned_identity.0.principal_id
+resource "kubernetes_cluster_role_binding" "aad_integration" {
+  metadata {
+    name = "${var.env}admins"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+  subject {
+    kind      = "Group"
+    name      = var.aks-aad-clusteradmins
+    api_group = "rbac.authorization.k8s.io"
+  }
+  depends_on = [module.aks]
 }
 
-resource "azurerm_role_assignment" "aks_mi_container_registry" {
-  scope                = azurerm_container_registry.acr.id
-  role_definition_name = "AcrPull"
-  principal_id         = module.aks.kubelet_identity.0.object_id
+
+
+# Allows all get list of namespaces, otherwise tools like 'kubens' won't work
+resource "kubernetes_cluster_role" "all_can_list_namespaces" {
+  depends_on = [module.aks]
+  for_each   = true ? toset(["ad_rbac"]) : []
+  metadata {
+    name = "list-namespaces"
+  }
+
+  rule {
+    api_groups = ["*"]
+    resources = [
+      "namespaces"
+    ]
+    verbs = [
+      "list",
+    ]
+  }
+}
+resource "kubernetes_cluster_role_binding" "all_can_list_namespaces" {
+  depends_on = [module.aks]
+  for_each   = true ? toset(["ad_rbac"]) : []
+  metadata {
+    name = "authenticated-can-list-namespaces"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.all_can_list_namespaces[each.key].metadata.0.name
+  }
+
+  subject {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Group"
+    name      = "system:authenticated"
+  }
 }

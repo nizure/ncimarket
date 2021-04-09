@@ -5,6 +5,25 @@ variable "env" {
   #   default     = "prod"
 }
 
+variable "kv-name" {
+  type        = string
+  description = "Application Gateway Name"
+  default     = "sihvault"
+  #   default     = "prod"
+}
+
+variable "aad_ns" {
+  type        = string
+  description = "test Namespace"
+  default     = "aadns"
+}
+
+variable "kv_csi_ns" {
+  type        = string
+  description = "Key Vault CSI Driver Namespace"
+  default     = "kv-csi"
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tag Name"
