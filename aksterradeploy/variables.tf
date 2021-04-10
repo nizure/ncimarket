@@ -1,17 +1,32 @@
 variable "env" {
   type        = string
   description = "Environment Name"
-  default     = "dev01"
-  #   default     = "prod"
+  default     = "prod03"
 }
 
 variable "tags" {
   type        = map(string)
   description = "Tag Name"
   default = {
-    source = "dev"
+    source = "devo"
   }
 }
+variable "kv-name" {
+  type        = string
+  description = "Key Vault Name"
+  default     = "temo"
+  #   default     = "prod"
+}
+
+variable "kv-rg" {
+  type        = string
+  description = "Key Vault Name"
+  default     = "microapplogs"
+  #   default     = "prod"
+}
+
+
+
 
 variable "apgw_name" {
   type        = string
