@@ -1,0 +1,3 @@
+[submodule "hipster-shop"]
+	path = hipster-shop
+	url = https://github.com/lightstep/hipster-shop.git
