@@ -1,6 +1,6 @@
-# https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-aks-applicationgateway-ingress
-# https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-install-new
-# https://denniszielke.medium.com/securing-ingress-with-azureappgateway-and-egress-traffic-with-azurefirewall-for-azure-kubernetes-41af94051347
+# # https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-aks-applicationgateway-ingress
+# # https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-install-new
+# # https://denniszielke.medium.com/securing-ingress-with-azureappgateway-and-egress-traffic-with-azurefirewall-for-azure-kubernetes-41af94051347
 
 # resource "azurerm_public_ip" "pip" {
 #   name                = "publicIp1"
@@ -11,7 +11,7 @@
 #   tags                = var.tags
 # }
 
-# Ref: https://registry.terraform.io/modules/claranet/app-gateway/azurerm/latest
+# # Ref: https://registry.terraform.io/modules/claranet/app-gateway/azurerm/latest
 
 # data "azurerm_key_vault_secret" "certificate" {
 #     name         = "certificate"
