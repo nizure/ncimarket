@@ -1,0 +1,31 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-adservice
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "src/adservice/**"
+  pull_request:
+     branches: [ master ]
+     paths:
+      - "src/adservice/**"     
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ACR build
+        id: acr
+        uses: ams0/acr-task-github-action@v1
+        with:
+          service_principal: ${{ secrets.service_principal }}
+          service_principal_password: ${{ secrets.service_principal_password }}
+          tenant: ${{ secrets.tenant }}
+          registry: ${{ secrets.registry }}
+          repository: ${{ secrets.repository }}
+          image: adservice
+          git_access_token: ${{ secrets.git_access_token }}
+          folder: src/adservice
+          dockerfile: dockerfiles
