@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI-adservice
+name: Build-adservice
 
 on:
   push:
@@ -9,8 +9,6 @@ on:
       - "src/adservice/**"
   pull_request:
      branches: [ master ]
-     paths:
-      - "src/adservice/**"     
 
 jobs:
   build:
@@ -24,8 +22,9 @@ jobs:
           service_principal_password: ${{ secrets.service_principal_password }}
           tenant: ${{ secrets.tenant }}
           registry: ${{ secrets.registry }}
-          repository: ${{ secrets.repository }}
-          image: adservice
-          git_access_token: ${{ secrets.git_access_token }}
+          repository: adservice
+          # image: adservice
+          tag: ${{github.run_number}}
+          # git_access_token: ${{ secrets.git_access_token }}
           folder: src/adservice
           dockerfile: dockerfiles
