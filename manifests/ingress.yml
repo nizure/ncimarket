@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: "prod03aks-919c"
+    labels:
+        app: "prod03aks-919c"
+    annotations:
+        kubernetes.io/ingress.class: addon-http-application-routing
+spec:
+    rules:
+        - host: app-prod03aks-919c.b0d0a66ef21849e6a93a.eastus.aksapp.io
+          http:
+            paths:
+            - path: /
+              backend:
+                serviceName: "prod03aks-919c"
+                servicePort: 9555
