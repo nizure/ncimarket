@@ -23,7 +23,7 @@ jobs:
           tenant: ${{ secrets.tenant }}
           registry: ${{ secrets.registry }}
           repository: adservice
-          # image: adservice
+          image: adservice
           tag: ${{github.run_number}}
           # git_access_token: ${{ secrets.git_access_token }}
           folder: eshopping/src/adservice
