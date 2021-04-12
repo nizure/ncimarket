@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "prod03aks-919c"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "prod03aks-919c"
+  template:
+    metadata:
+      labels:
+        app: "prod03aks-919c"
+    spec:
+      containers:
+        - name: "prod03aks-919c"
+          image: "prod03acreg.azurecr.io/prod03aks"
+          ports:
+          - containerPort: 9555
