@@ -57,5 +57,4 @@ jobs:
           manifests/ingress.yml
         images: |
           prod03acreg.azurecr.io/adservice:${{ github.sha }}
-        imagepullsecrets: |
-          prod03aksdockerauth
+        imagepullsecrets: prod03aksdockerauth
