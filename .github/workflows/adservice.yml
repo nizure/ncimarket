@@ -6,7 +6,7 @@ on:
   push:
     branches: [ master ]
     paths:
-      - "src/adservice/**"
+      - "eshopping/src/adservice/**"
   pull_request:
      branches: [ master ]
 
@@ -26,5 +26,5 @@ jobs:
           # image: adservice
           tag: ${{github.run_number}}
           # git_access_token: ${{ secrets.git_access_token }}
-          folder: src/adservice
+          folder: eshopping/src/adservice
           dockerfile: dockerfiles
