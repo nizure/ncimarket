@@ -1,7 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Build-adservice
-
 on:
   push:
     branches: [ master ]
@@ -10,51 +7,34 @@ on:
   pull_request:
      branches: [ master ]
 
+env:
+  RESOURCEGROUPNAME: "secret-store-csi-aks-akv-rg"
+  IMAGENAME: "adservice"
+  REGISTRYNAME: "prod03acreg"
+  APPATH: "eshopping/src/adservice"
+  CLUSTERNAME: "secret-store-csi-aks-akv"
+
+
 jobs:
-  build-and-deploy:
+  build:
+    name: Build and push image to container registry
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+        # login to azure
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - uses: azure/docker-login@v1
       with:
-        login-server: prod03acreg.azurecr.io
+        login-server: ${{ env.REGISTRYNAME }}.azurecr.io
         username: ${{ secrets.acr_prod03acreg_username }}
         password: ${{ secrets.acr_prod03acreg_password }}
     
     - name: Build and push image to ACR
       id: build-image
       run: |
-        docker build "$GITHUB_WORKSPACE/eshopping/src/adservice" -f  "eshopping/src/adservice/Dockerfile" -t prod03acreg.azurecr.io/adservice:${{ github.sha }} --label dockerfile-path=eshopping/src/adservice/Dockerfile
-        docker push prod03acreg.azurecr.io/adservice:${{ github.sha }}
-    
-    - uses: azure/k8s-set-context@v1
-      with:
-         kubeconfig: ${{ secrets.aks_prod03aks_kubeConfig }}
-      id: login
-    
-    - name: Create namespace
-      run: |
-        namespacePresent=`kubectl get namespace | grep app | wc -l`
-        if [ $namespacePresent -eq 0 ]
-        then
-            echo `kubectl create namespace app`
-        fi
-    - uses: azure/k8s-create-secret@v1
-      with:
-        namespace: app
-        container-registry-url: prod03acreg.azurecr.io
-        container-registry-username: ${{ secrets.acr_prod03acreg_username }}
-        container-registry-password: ${{ secrets.acr_prod03acreg_password }}
-        secret-name: prod03aksdockerauth
-       
-    - uses: azure/k8s-deploy@v1.2
-      with:
-        namespace: app
-        manifests: |
-          manifests/deployment.yml
-          manifests/service.yml
-          manifests/ingress.yml
-        images: |
-          prod03acreg.azurecr.io/adservice:${{ github.sha }}
-        imagepullsecrets: prod03aksdockerauth
+        docker build $GITHUB_WORKSPACE/${{ env.APPATH }} -f  ${{ env.APPATH }}/Dockerfile -t ${{ env.REGISTRYNAME }}.azurecr.io/${{ env.IMAGENAME }}:${{ github.sha }}
+        docker push ${{ env.REGISTRYNAME }}.azurecr.io/${{ env.IMAGENAME }}:${{ github.sha }}   
