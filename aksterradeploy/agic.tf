@@ -7,7 +7,7 @@ resource "azurerm_public_ip" "pip" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
-  sku                 = "Standard_v2"   # WAF_v2
+  sku                 = "Standard"   # WAF_v2
   tags                = var.tags
 }
 
@@ -34,10 +34,10 @@ resource "azurerm_application_gateway" "network" {
     subnet_id = module.vnet.vnet_subnets[1]
   }
 
-  ssl_certificate {
-    name = data.azurerm_key_vault_secret.certificate.value
-    data = var.password
-  }
+  # ssl_certificate {
+  #   name = data.azurerm_key_vault_secret.certificate.value
+  #   data = var.password
+  # }
 
   frontend_port {
     name = "${var.apgw_name}-feport"
