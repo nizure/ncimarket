@@ -21,10 +21,10 @@ provider "azuread" {
 
 data "azurerm_subscription" "current" {}
 
-data "azurerm_kubernetes_cluster" "main" {
-  name                = "${var.env}-aks"
-  resource_group_name = azurerm_resource_group.rg.name
-}
+# data "azurerm_kubernetes_cluster" "main" {
+#   name                = "${var.env}-aks"
+#   resource_group_name = azurerm_resource_group.rg.name
+# }
 resource "azurerm_resource_group" "rg" {
   name     = "${var.env}-aks-rg"
   location = var.location

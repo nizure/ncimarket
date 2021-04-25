@@ -13,10 +13,10 @@ resource "azurerm_public_ip" "pip" {
 
 # Ref: https://registry.terraform.io/modules/claranet/app-gateway/azurerm/latest
 
-data "azurerm_key_vault_secret" "certificate" {
-    name         = "certificate"
-    key_vault_id = var.key_vault_id
-}
+# data "azurerm_key_vault_secret" "certificate" {
+#     name         = "certificate"
+#     key_vault_id = var.key_vault_id
+# }
 
 resource "azurerm_application_gateway" "network" {
   name                = var.apgw_name

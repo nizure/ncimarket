@@ -1,14 +1,14 @@
 variable "env" {
   type        = string
   description = "Environment Name"
-  default     = "prod03"
+  default     = "gs2edev"
 }
 
 variable "tags" {
   type        = map(string)
   description = "Tag Name"
   default = {
-    source = "devo"
+    source = "gs2edev"
   }
 }
 variable "kv-name" {
@@ -41,28 +41,34 @@ variable "app_gateway_sku" {
 }
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "westeurope"
+  #   default = "westeurope"
+}
+
+variable "failover_location" {
+  type    = string
+  default = "northeurope"
   #   default = "westeurope"
 }
 
 variable "vnet_address_prefix" {
   description = "VNET address prefix"
-  default     = "10.100.0.0/18"
+  default     = "10.250.0.0/18"
 }
 
 variable "aks_subnet_address_prefix" {
   description = "Subnet address prefix."
-  default     = "10.100.0.0/20"
+  default     = "10.250.0.0/20"
 }
 
 variable "gateway_subnet_address_prefix" {
   description = "gateway subnet address prefix."
-  default     = "10.100.16.0/25"
+  default     = "10.250.16.0/25"
 }
 
 variable "admin_subnet_address_prefix" {
   description = "admin subnet address prefix."
-  default     = "10.100.17.0/24"
+  default     = "10.250.17.0/24"
 }
 
 variable "kubversion" {
@@ -71,7 +77,7 @@ variable "kubversion" {
 }
 variable "vm_size" {
   description = "AKS Node Poll VM Size"
-  default     = "Standard_DS2_v2"
+  default     = "Standard_D4s_v3"
 }
 
 variable "os_size" {
@@ -85,7 +91,7 @@ variable "max_node" {
 
 variable "min_node" {
   description = "Min node number"
-  default     = 2
+  default     = 3
 }
 
 variable "aks-aad-clusteradmins" {
@@ -99,10 +105,10 @@ variable "azure_ad_admin_groups" {
 
 }
 
-variable "logspaceid" {
-  description = "LogAnalitics Workspace ID"
-  type        = string
-  default     = "/subscriptions/74677981-7139-4510-80ad-237e199e4b4a/resourcegroups/microapplogs/providers/microsoft.operationalinsights/workspaces/logspacemicro"
+# variable "logspaceid" {
+#   description = "LogAnalitics Workspace ID"
+#   type        = string
+#   default     = "/subscriptions/74677981-7139-4510-80ad-237e199e4b4a/resourcegroups/microapplogs/providers/microsoft.operationalinsights/workspaces/logspacemicro"
 
-}
+# }
 

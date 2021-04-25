@@ -17,6 +17,7 @@ module "aks" {
   network_plugin                   = "azure"
   network_policy                   = "azure"
   vnet_subnet_id                   = module.vnet.vnet_subnets[0]
+  agents_size                      = var.vm_size
   os_disk_size_gb                  = var.os_size
   sku_tier                         = "Paid" # defaults to Free
   enable_role_based_access_control = true
